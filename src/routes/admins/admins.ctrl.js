@@ -197,7 +197,8 @@ exports.check = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.register = async (ctx) => {
-  const { email, password } = ctx.request.body;
+  const { email, password, key } = ctx.request.body;
+  ctx.assert(key === process.env.ADMIN_KEY, 404);
   const res = await models.Admin.findOne({ where: { email } });
   ctx.assert(!res, 400);
   var salt = genRandomString(16);

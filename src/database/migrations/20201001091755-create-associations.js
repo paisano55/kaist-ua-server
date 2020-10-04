@@ -3,7 +3,7 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // Board hasMany Post
-    return queryInterface.createTable("Student_Petition", {
+    await queryInterface.createTable("Student_Petition", {
       StudentId: {
         type: Sequelize.UUID,
         references: {
