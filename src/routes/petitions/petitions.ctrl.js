@@ -8,10 +8,20 @@ exports.write = async (ctx) => {
     where: { id },
   });
   ctx.assert(student, 401);
-  const petition = ctx.request.body;
-  const res = await models.Petition.create(petition);
+  const { korTitle, engTitle, korContent, engContent } = ctx.request.body;
+  const res = await models.Petition.create({
+    korTitle,
+    engTitle,
+    korContent,
+    engContent,
+  });
   ctx.assert(res, 400);
-  res.addStudent(student);
+  student.addPetition(res);
+  const newStudent = await models.Student.findOne({
+    where: { id },
+    include: models.Petition,
+  });
+  console.log(newStudent.Petitions);
   ctx.body = res;
   ctx.status = 200;
 };
@@ -31,8 +41,6 @@ exports.list = async (ctx) => {
     raw: false,
     include: models.Student,
   });
-
-  console.log(petitions);
 
   const petitionCount = await models.Petition.count();
 

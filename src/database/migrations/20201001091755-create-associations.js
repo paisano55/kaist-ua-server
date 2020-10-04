@@ -12,7 +12,6 @@ module.exports = {
         },
         onUpdate: "CASCADE",
         onDelete: "RESTRICT",
-        unique: true,
       },
       PetitionId: {
         type: Sequelize.UUID,
@@ -22,7 +21,6 @@ module.exports = {
         },
         onUpdate: "CASCADE",
         onDelete: "RESTRICT",
-        unique: true,
       },
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE,
