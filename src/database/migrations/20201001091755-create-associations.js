@@ -11,7 +11,7 @@ module.exports = {
           key: "id", // key in Target model that we're referencing
         },
         onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
+        onDelete: "CASCADE",
       },
       PetitionId: {
         type: Sequelize.UUID,
@@ -20,7 +20,7 @@ module.exports = {
           key: "id", // key in Target model that we're referencing
         },
         onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
+        onDelete: "CASCADE",
       },
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE,
