@@ -6,5 +6,6 @@ petitions.post("/", petitionsCtrl.write);
 petitions.get("/", petitionsCtrl.list);
 petitions.get("/:id", petitionsCtrl.read);
 petitions.post("/vote/:id", petitionsCtrl.vote);
+petitions.delete("/:id", petitionsCtrl.delete);
 
 module.exports = petitions;

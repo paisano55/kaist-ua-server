@@ -14,14 +14,14 @@ exports.write = async (ctx) => {
     engTitle,
     korContent,
     engContent,
+    authorId: id,
   });
   ctx.assert(res, 400);
-  student.addPetition(res);
+  const a = await res.addStudents([student]);
   const newStudent = await models.Student.findOne({
     where: { id },
     include: models.Petition,
   });
-  console.log(newStudent.Petitions);
   ctx.body = res;
   ctx.status = 200;
 };
@@ -79,10 +79,7 @@ exports.vote = async (ctx) => {
   });
   ctx.assert(petition, 400);
 
-  console.log(petition);
   const exists = petition.Students.some((petitionStudent) => {
-    console.log(petitionStudent.id);
-    console.log(studentId);
     return petitionStudent.id === studentId;
   });
 
@@ -91,8 +88,25 @@ exports.vote = async (ctx) => {
     return;
   }
 
-  petition.addStudent(student);
+  petition.addStudents([student]);
 
   ctx.body = petition.id;
   ctx.status = 200;
+};
+
+exports.delete = async (ctx) => {
+  ctx.assert(ctx.request.user, 401);
+  const studentId = ctx.request.user.id;
+  const student = await models.Student.findOne({
+    where: { id: studentId },
+  });
+  const { petitionId } = ctx.request.params;
+  const petition = await models.Petition.findOne({
+    where: { id: petitionId },
+  });
+  ctx.assert(petition.authorId === studentId, 401);
+
+  await petition.destroy();
+
+  ctx.status = 204;
 };

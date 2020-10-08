@@ -8,23 +8,30 @@ exports.bulkUpload = async (ctx) => {
     where: { id },
   });
   ctx.assert(admin, 401);
-  const { studentNumberList, year, semester } = ctx.request.body;
+  const { studentDataCollection } = ctx.request.body;
   const bulkData = [];
+  const semesters = ["spring", "fall"];
   await Promise.all(
-    studentNumberList.map(async (studentNumber) => {
-      const payment = {
-        studentNumber,
-        year,
-        semester,
-      };
+    studentDataCollection.map(async (studentData) => {
+      const studentNumber = studentData.shift();
       const student = await models.Student.findOne({
         where: { studentNumber },
       });
+      let studentId;
       if (student) {
-        payment.studentId = student.id;
-        console.log(payment);
+        studentId = student.id;
       }
-      bulkData.push(payment);
+      for (var i = 0; i < studentData.length; i++) {
+        if (studentData[i] === "1") {
+          const payment = {
+            studentNumber,
+            year: `${parseInt(i / 2) + 2016}`,
+            semester: semesters[i % 2],
+            studentId,
+          };
+          bulkData.push(payment);
+        }
+      }
     })
   );
   const res = await models.Payment.bulkCreate(bulkData);

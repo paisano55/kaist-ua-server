@@ -29,7 +29,7 @@ module.exports = {
               key: "studentNumber",
             },
             onUpdate: "CASCADE",
-            onDelete: "SET NULL",
+            onDelete: "CASCADE",
           }
         );
       })
