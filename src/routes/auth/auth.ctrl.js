@@ -23,7 +23,7 @@ exports.signup = async (ctx) => {
       console.log(payments);
       await Promise.all(
         payments.map(async (payment) => {
-          payment.StudentId = studentId;
+          payment.studentId = studentId;
           await payment.save();
         })
       );
