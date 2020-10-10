@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Petition = sequelize.define(
-    "Petition",
+    'Petition',
     {
       id: {
         type: DataTypes.UUID,
@@ -30,14 +30,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
-      charset: "utf8",
-      collate: "utf8_general_ci",
-    }
+      charset: 'utf8',
+      collate: 'utf8_general_ci',
+    },
   );
 
   Petition.associate = function (models) {
-    Petition.belongsToMany(models.Student, { through: "Student_Petition" });
-    Petition.belongsTo(models.Student, { foreignKey: "authorId" });
+    Petition.belongsToMany(models.Student, { through: 'Student_Petition' });
+    Petition.belongsTo(models.Student, { foreignKey: 'authorId' });
   };
 
   return Petition;
