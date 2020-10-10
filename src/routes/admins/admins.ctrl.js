@@ -1,19 +1,19 @@
-const models = require("../../database/models");
-const { generateToken } = require("../auth/generateToken");
-const crypto = require("crypto");
-const { assert } = require("console");
+const models = require('../../database/models');
+const { generateToken } = require('../auth/generateToken');
+const crypto = require('crypto');
+const { assert } = require('console');
 
 const genRandomString = function (length) {
   return crypto
     .randomBytes(Math.ceil(length / 2))
-    .toString("hex") /** convert to hexadecimal format */
+    .toString('hex') /** convert to hexadecimal format */
     .slice(0, length); /** return required number of characters */
 };
 
 const hashed = (data, salt) => {
-  const hash = crypto.createHmac("sha512", salt);
+  const hash = crypto.createHmac('sha512', salt);
   hash.update(data);
-  return hash.digest("hex");
+  return hash.digest('hex');
 };
 
 /** @swagger
@@ -94,7 +94,7 @@ exports.login = async (ctx) => {
   });
   ctx.status = 200;
   ctx.body = {
-    auth: "admin",
+    auth: 'admin',
   };
 };
 
@@ -141,7 +141,7 @@ exports.check = async (ctx) => {
     return;
   }
   ctx.status = 200;
-  ctx.body = { auth: "admin" };
+  ctx.body = { auth: 'admin' };
 };
 
 /** @swagger

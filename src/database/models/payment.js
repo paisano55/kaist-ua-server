@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Payment = sequelize.define(
-    "Payment",
+    'Payment',
     {
       id: {
         type: DataTypes.UUID,
@@ -15,13 +15,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       freezeTableName: true,
       timestamps: false,
-      charset: "utf8",
-      collate: "utf8_general_ci",
-    }
+      charset: 'utf8',
+      collate: 'utf8_general_ci',
+    },
   );
   Payment.associate = function (models) {
     // associations can be defined here
-    Payment.belongsTo(models.Student, { foreignKey: "studentId" });
+    Payment.belongsTo(models.Student, { foreignKey: 'studentId' });
   };
   return Payment;
 };

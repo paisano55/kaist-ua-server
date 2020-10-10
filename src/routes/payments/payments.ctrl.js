@@ -1,5 +1,5 @@
-const models = require("../../database/models");
-const Op = require("sequelize").Op;
+const models = require('../../database/models');
+const Op = require('sequelize').Op;
 
 exports.bulkUpload = async (ctx) => {
   ctx.assert(ctx.request.user, 401);
@@ -10,7 +10,7 @@ exports.bulkUpload = async (ctx) => {
   ctx.assert(admin, 401);
   const { studentDataCollection } = ctx.request.body;
   const bulkData = [];
-  const semesters = ["spring", "fall"];
+  const semesters = ['spring', 'fall'];
   await Promise.all(
     studentDataCollection.map(async (studentData) => {
       const studentNumber = studentData.shift();
@@ -22,7 +22,7 @@ exports.bulkUpload = async (ctx) => {
         studentId = student.id;
       }
       for (var i = 0; i < studentData.length; i++) {
-        if (studentData[i] === "1") {
+        if (studentData[i] === '1') {
           const payment = {
             studentNumber,
             year: `${parseInt(i / 2) + 2016}`,
@@ -32,7 +32,7 @@ exports.bulkUpload = async (ctx) => {
           bulkData.push(payment);
         }
       }
-    })
+    }),
   );
   const res = await models.Payment.bulkCreate(bulkData);
   if (res) {

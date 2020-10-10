@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Board = sequelize.define(
-    "Board",
+    'Board',
     {
       id: {
         autoIncrement: true,
@@ -16,13 +16,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       freezeTableName: true,
       timestamps: false,
-      charset: "utf8",
-      collate: "utf8_general_ci",
-    }
+      charset: 'utf8',
+      collate: 'utf8_general_ci',
+    },
   );
 
   Board.associate = function (models) {
-    models.Board.hasMany(models.Post, { foreignKey: "boardId" });
+    models.Board.hasMany(models.Post, { foreignKey: 'boardId' });
   };
 
   return Board;
