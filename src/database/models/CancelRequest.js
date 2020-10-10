@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const CancelRequest = sequelize.define(
-    "CancelRequest",
+    'CancelRequest',
     {
       id: {
         type: DataTypes.UUID,
@@ -13,15 +13,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
-      charset: "utf8",
-      collate: "utf8_general_ci",
-    }
+      charset: 'utf8',
+      collate: 'utf8_general_ci',
+    },
   );
   CancelRequest.associate = function (models) {
     // associations can be defined here
     CancelRequest.belongsTo(models.Student, {
-      targetKey: "studentNumber",
-      foreignKey: "studentNumber",
+      targetKey: 'studentNumber',
+      foreignKey: 'studentNumber',
     });
   };
   return CancelRequest;

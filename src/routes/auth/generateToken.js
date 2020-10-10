@@ -1,5 +1,5 @@
 const jwtSecret = process.env.JWT_SECRET;
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 function generateToken(payload) {
   return new Promise((resolve, reject) => {
@@ -7,12 +7,12 @@ function generateToken(payload) {
       payload,
       jwtSecret,
       {
-        expiresIn: "7d",
+        expiresIn: '7d',
       },
       (error, token) => {
         if (error) reject(error);
         resolve(token);
-      }
+      },
     );
   });
 }

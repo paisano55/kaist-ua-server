@@ -1,5 +1,5 @@
 const parseJSON = (jsonString, fallback = {}) => {
-  if (typeof jsonString === "object") {
+  if (typeof jsonString === 'object') {
     return jsonString;
   }
 
@@ -13,7 +13,7 @@ const parseJSON = (jsonString, fallback = {}) => {
 };
 
 const jwtSecret = process.env.JWT_SECRET;
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 function decodeToken(token) {
   return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ async function jwtMiddleware(ctx, next) {
     if (Date.now() / 1000 - decoded.iat > 60 * 60 * 24) {
       // 하루가 지나면 갱신해준다.
       const { id } = decoded;
-      const { generateToken } = require("../routes/auth/generateToken");
+      const { generateToken } = require('../routes/auth/generateToken');
       const freshToken = await generateToken({ id });
       ctx.cookies.set(process.env.ACCESS_TOKEN, freshToken, {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7days
@@ -44,7 +44,7 @@ async function jwtMiddleware(ctx, next) {
     ctx.request.user = decoded;
   } catch (e) {
     // token validate 실패
-    ctx.request.user = "ERROR";
+    ctx.request.user = 'ERROR';
   }
 
   return next();

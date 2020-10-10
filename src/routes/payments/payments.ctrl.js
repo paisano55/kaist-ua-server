@@ -1,5 +1,5 @@
-const models = require("../../database/models");
-const Op = require("sequelize").Op;
+const models = require('../../database/models');
+const Op = require('sequelize').Op;
 
 exports.bulkUpload = async (ctx) => {
   ctx.assert(ctx.request.user, 401);
@@ -25,7 +25,7 @@ exports.bulkUpload = async (ctx) => {
         console.log(payment);
       }
       bulkData.push(payment);
-    })
+    }),
   );
   const res = await models.Payment.bulkCreate(bulkData);
   if (res) {

@@ -1,5 +1,5 @@
-const models = require("../../database/models");
-const Op = require("sequelize").Op;
+const models = require('../../database/models');
+const Op = require('sequelize').Op;
 
 /**
  * POST /cancelRequest
@@ -46,7 +46,7 @@ exports.getAll = async (ctx) => {
   });
   ctx.assert(admin, 401);
   const res = await models.CancelRequest.findAll({
-    order: [["ku_std_no", "ASC"]],
+    order: [['ku_std_no', 'ASC']],
   });
   ctx.assert(res, 404);
   ctx.body = res;
