@@ -12,7 +12,7 @@ const cancelRequest = require("./cancelRequest");
 const router = new Router();
 
 router.get("/hello", (ctx) => {
-  ctx.body = "hello";
+    ctx.body = "hello";
 });
 
 router.use("/auth", auth.routes());
@@ -24,4 +24,8 @@ router.use("/petitions", petitions.routes());
 router.use("/payments", payments.routes());
 router.use("/cancelRequest", cancelRequest.routes());
 
-module.exports = router;
+const baseRouter = new Router();
+
+baseRouter.use("/web/api", router.routes());
+
+module.exports = baseRouter;
