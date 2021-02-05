@@ -1,5 +1,5 @@
-const models = require("../../database/models");
-const Op = require("sequelize").Op;
+const models = require('../../database/models');
+const Op = require('sequelize').Op;
 
 /** @swagger
  *  /posts:
@@ -160,7 +160,7 @@ exports.list = async (ctx) => {
   var where = { BoardId: parseInt(boardId) };
 
   const posts = await models.Post.findAll({
-    order: [["createdAt", "DESC"]],
+    order: [['createdAt', 'DESC']],
     offset: offset,
     limit: POST_NUM_PER_PAGE,
     where: where,
@@ -295,10 +295,10 @@ exports.remove = async (ctx) => {
       if (!res) {
         ctx.status = 404;
         ctx.body = {
-          message: "포스트가 존재하지 않습니다.",
+          message: '포스트가 존재하지 않습니다.',
         };
       } else {
-        console.log("포스트 삭제 성공!");
+        console.log('포스트 삭제 성공!');
         ctx.status = 204;
       }
     })
@@ -378,7 +378,7 @@ exports.update = async (ctx) => {
   })
     .then((res) => {
       ctx.body = post;
-      console.log("포스트 업데이트 성공!");
+      console.log('포스트 업데이트 성공!');
     })
     .catch((err) => {
       console.log(err);

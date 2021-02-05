@@ -1,5 +1,5 @@
-const models = require("../../database/models");
-const Op = require("sequelize").Op;
+const models = require('../../database/models');
+const Op = require('sequelize').Op;
 
 exports.write = async (ctx) => {
   ctx.assert(ctx.request.user, 401);
@@ -35,7 +35,7 @@ exports.list = async (ctx) => {
   const offset = PAGE_SIZE * (page - 1);
 
   const petitions = await models.Petition.findAll({
-    order: [["createdAt", "DESC"]],
+    order: [['createdAt', 'DESC']],
     offset,
     limit: PAGE_SIZE,
     raw: false,

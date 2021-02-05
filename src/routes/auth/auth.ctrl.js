@@ -1,6 +1,6 @@
-const models = require("../../database/models");
-const { generateToken } = require("./generateToken");
-const e = require("cors");
+const models = require('../../database/models');
+const { generateToken } = require('./generateToken');
+const e = require('cors');
 
 exports.signup = async (ctx) => {
   const { USER_INFO, state } = JSON.parse(ctx.request.body.result).dataMap;
@@ -25,7 +25,7 @@ exports.signup = async (ctx) => {
         payments.map(async (payment) => {
           payment.StudentId = StudentId;
           await payment.save();
-        })
+        }),
       );
     } else {
     }
@@ -42,7 +42,7 @@ exports.signup = async (ctx) => {
 };
 
 exports.logout = async (ctx) => {
-  ctx.cookies.set(process.env.ACCESS_TOKEN, "", { overwrite: true });
+  ctx.cookies.set(process.env.ACCESS_TOKEN, '', { overwrite: true });
   ctx.status = 200;
 };
 
@@ -59,13 +59,13 @@ exports.check = async (ctx) => {
       ctx.status = 204;
       return;
     } else {
-      ctx.body = { auth: "admin" };
+      ctx.body = { auth: 'admin' };
       return;
     }
   }
   ctx.status = 200;
   ctx.body = {
-    auth: "student",
+    auth: 'student',
     korName: student.korName,
     engName: student.engName,
   };
