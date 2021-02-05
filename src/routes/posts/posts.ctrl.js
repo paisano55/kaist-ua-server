@@ -1,5 +1,5 @@
-const models = require('../../database/models');
-const Op = require('sequelize').Op;
+const models = require("../../database/models");
+const Op = require("sequelize").Op;
 
 /** @swagger
  *  /posts:
@@ -60,19 +60,19 @@ const Op = require('sequelize').Op;
  *          description: Internal Server Error
  */
 exports.write = async (ctx) => {
-  console.log(ctx.request);
-  ctx.assert(ctx.request.user, 401);
-  const { id } = ctx.request.user;
-  const admin = await models.Admin.findOne({
-    where: { id },
-  });
-  ctx.assert(admin, 401);
-  const post = ctx.request.body;
-  post.BoardId = parseInt(post.boardId);
-  console.log(post);
-  const res = await models.Post.create(post);
-  ctx.assert(res, 400);
-  ctx.status = 204;
+    console.log(ctx.request);
+    ctx.assert(ctx.request.user, 401);
+    const { id } = ctx.request.user;
+    const admin = await models.Admin.findOne({
+        where: { id },
+    });
+    ctx.assert(admin, 401);
+    const post = ctx.request.body;
+    post.BoardId = parseInt(post.boardId);
+    console.log(post);
+    const res = await models.Post.create(post);
+    ctx.assert(res, 400);
+    ctx.status = 204;
 };
 
 /** @swagger
@@ -150,30 +150,30 @@ exports.write = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.list = async (ctx) => {
-  const { page, boardId } = ctx.request.query;
-  const POST_NUM_PER_PAGE = 15;
+    const { page, BoardId } = ctx.request.query;
+    const POST_NUM_PER_PAGE = 15;
 
-  ctx.assert(page > 0, 400);
+    ctx.assert(page > 0, 400);
 
-  const offset = POST_NUM_PER_PAGE * (page - 1);
+    const offset = POST_NUM_PER_PAGE * (page - 1);
 
-  var where = { BoardId: parseInt(boardId) };
+    var where = { BoardId: parseInt(BoardId) };
 
-  const posts = await models.Post.findAll({
-    order: [['createdAt', 'DESC']],
-    offset: offset,
-    limit: POST_NUM_PER_PAGE,
-    where: where,
-    raw: false,
-  });
+    const posts = await models.Post.findAll({
+        order: [["createdAt", "DESC"]],
+        offset: offset,
+        limit: POST_NUM_PER_PAGE,
+        where: where,
+        raw: false,
+    });
 
-  const postCount = await models.Post.count({
-    where: where,
-  });
+    const postCount = await models.Post.count({
+        where: where,
+    });
 
-  const lastPage = Math.ceil(postCount / POST_NUM_PER_PAGE);
+    const lastPage = Math.ceil(postCount / POST_NUM_PER_PAGE);
 
-  ctx.body = { posts, lastPage };
+    ctx.body = { posts, lastPage };
 };
 
 /** @swagger
@@ -230,22 +230,22 @@ exports.list = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.read = async (ctx) => {
-  const { id } = ctx.params;
+    const { id } = ctx.params;
 
-  await models.Post.findOne({
-    where: { id },
-    raw: false,
-    include: models.Board,
-  })
-    .then((res) => {
-      ctx.body = res;
-      console.log(res);
-
-      models.Post.update({ views: res.views + 1 }, { where: { id } });
+    await models.Post.findOne({
+        where: { id },
+        raw: false,
+        include: models.Board,
     })
-    .catch((err) => {
-      console.log(err);
-    });
+        .then((res) => {
+            ctx.body = res;
+            console.log(res);
+
+            models.Post.update({ views: res.views + 1 }, { where: { id } });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
 
 /** @swagger
@@ -280,31 +280,31 @@ exports.read = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.remove = async (ctx) => {
-  ctx.assert(ctx.request.user, 401);
-  const adminId = ctx.request.user.id;
-  const admin = await models.Admin.findOne({
-    where: { id: adminId },
-  });
-  ctx.assert(admin, 401);
-  const { id } = ctx.params;
-
-  await models.Post.destroy({
-    where: { id: id },
-  })
-    .then((res) => {
-      if (!res) {
-        ctx.status = 404;
-        ctx.body = {
-          message: '포스트가 존재하지 않습니다.',
-        };
-      } else {
-        console.log('포스트 삭제 성공!');
-        ctx.status = 204;
-      }
-    })
-    .catch((err) => {
-      console.log(err);
+    ctx.assert(ctx.request.user, 401);
+    const adminId = ctx.request.user.id;
+    const admin = await models.Admin.findOne({
+        where: { id: adminId },
     });
+    ctx.assert(admin, 401);
+    const { id } = ctx.params;
+
+    await models.Post.destroy({
+        where: { id: id },
+    })
+        .then((res) => {
+            if (!res) {
+                ctx.status = 404;
+                ctx.body = {
+                    message: "포스트가 존재하지 않습니다.",
+                };
+            } else {
+                console.log("포스트 삭제 성공!");
+                ctx.status = 204;
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
 
 /** @swagger
@@ -358,29 +358,29 @@ exports.remove = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.update = async (ctx) => {
-  ctx.assert(ctx.request.user, 401);
-  const adminId = ctx.request.user.id;
-  const admin = await models.Admin.findOne({
-    where: { id: adminId },
-  });
-  ctx.assert(admin, 401);
-  const { id } = ctx.params;
-  const { title, author, content, views } = ctx.request.body;
-  const post = {
-    title: title,
-    author: author,
-    content: content,
-    views: views,
-  };
-
-  await models.Post.update(post, {
-    where: { id: id },
-  })
-    .then((res) => {
-      ctx.body = post;
-      console.log('포스트 업데이트 성공!');
-    })
-    .catch((err) => {
-      console.log(err);
+    ctx.assert(ctx.request.user, 401);
+    const adminId = ctx.request.user.id;
+    const admin = await models.Admin.findOne({
+        where: { id: adminId },
     });
+    ctx.assert(admin, 401);
+    const { id } = ctx.params;
+    const { title, author, content, views } = ctx.request.body;
+    const post = {
+        title: title,
+        author: author,
+        content: content,
+        views: views,
+    };
+
+    await models.Post.update(post, {
+        where: { id: id },
+    })
+        .then((res) => {
+            ctx.body = post;
+            console.log("포스트 업데이트 성공!");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };

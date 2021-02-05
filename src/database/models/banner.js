@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 module.exports = (sequelize, DataTypes) => {
   const Banner = sequelize.define(
-    'Banner',
+    "Banner",
     {
       id: {
         type: DataTypes.UUID,
@@ -15,9 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       freezeTableName: true,
       timestamps: false,
-      charset: 'utf8',
-      collate: 'utf8_general_ci',
-    },
+      charset: "utf8",
+      collate: "utf8_general_ci",
+    }
   );
   Banner.associate = function (models) {
     // associations can be defined here
