@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Board.associate = function (models) {
-    models.Board.hasMany(models.Post, { foreignKey: "boardId" });
+    models.Board.hasMany(models.Post);
+    models.Board.hasMany(models.PostTag);
   };
 
   return Board;

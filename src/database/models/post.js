@@ -34,7 +34,8 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Post.associate = function (models) {
-    models.Post.belongsTo(models.Board, { foreignKey: "boardId" });
+    Post.belongsTo(models.Board);
+    Post.belongsToMany(models.PostTag, { through: "Post_PostTag" });
   };
 
   return Post;

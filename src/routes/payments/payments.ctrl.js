@@ -17,9 +17,9 @@ exports.bulkUpload = async (ctx) => {
       const student = await models.Student.findOne({
         where: { studentNumber },
       });
-      let studentId;
+      let StudentId;
       if (student) {
-        studentId = student.id;
+        StudentId = student.id;
       }
       for (var i = 0; i < studentData.length; i++) {
         if (studentData[i] === "1") {
@@ -27,7 +27,7 @@ exports.bulkUpload = async (ctx) => {
             studentNumber,
             year: `${parseInt(i / 2) + 2016}`,
             semester: semesters[i % 2],
-            studentId,
+            StudentId,
           };
           bulkData.push(payment);
         }

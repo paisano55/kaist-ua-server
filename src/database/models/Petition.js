@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      authorId: DataTypes.UUID,
+      StudentId: DataTypes.UUID,
       korTitle: DataTypes.TEXT,
       engTitle: DataTypes.TEXT,
       korContent: DataTypes.TEXT,
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Petition.associate = function (models) {
     Petition.belongsToMany(models.Student, { through: "Student_Petition" });
-    Petition.belongsTo(models.Student, { foreignKey: "authorId" });
+    Petition.belongsTo(models.Student);
   };
 
   return Petition;

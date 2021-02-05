@@ -1,16 +1,16 @@
 "use strict";
 module.exports = (sequelize, DataTypes) => {
-  const Payment = sequelize.define(
-    "Payment",
+  const Banner = sequelize.define(
+    "Banner",
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      studentNumber: DataTypes.STRING,
-      year: DataTypes.INTEGER,
-      semester: DataTypes.STRING,
+      image: DataTypes.TEXT,
+      link: DataTypes.TEXT,
+      isActive: DataTypes.BOOLEAN,
     },
     {
       freezeTableName: true,
@@ -19,9 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       collate: "utf8_general_ci",
     }
   );
-  Payment.associate = function (models) {
+  Banner.associate = function (models) {
     // associations can be defined here
-    Payment.belongsTo(models.Student);
   };
-  return Payment;
+  return Banner;
 };

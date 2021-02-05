@@ -16,14 +16,14 @@ exports.signup = async (ctx) => {
   if (record || key === process.env.REGISTER_KEY) {
     if (!record) {
       record = await models.Student.create(newStudent);
-      const studentId = record.id;
+      const StudentId = record.id;
       const payments = await models.Payment.findAll({
         where: { studentNumber: record.studentNumber },
       });
       console.log(payments);
       await Promise.all(
         payments.map(async (payment) => {
-          payment.studentId = studentId;
+          payment.StudentId = StudentId;
           await payment.save();
         })
       );

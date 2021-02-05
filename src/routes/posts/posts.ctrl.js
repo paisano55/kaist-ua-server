@@ -60,6 +60,7 @@ const Op = require("sequelize").Op;
  *          description: Internal Server Error
  */
 exports.write = async (ctx) => {
+  console.log(ctx.request);
   ctx.assert(ctx.request.user, 401);
   const { id } = ctx.request.user;
   const admin = await models.Admin.findOne({
@@ -67,7 +68,8 @@ exports.write = async (ctx) => {
   });
   ctx.assert(admin, 401);
   const post = ctx.request.body;
-  post.boardId = parseInt(post.boardId);
+  post.BoardId = parseInt(post.boardId);
+  console.log(post);
   const res = await models.Post.create(post);
   ctx.assert(res, 400);
   ctx.status = 204;
@@ -155,7 +157,7 @@ exports.list = async (ctx) => {
 
   const offset = POST_NUM_PER_PAGE * (page - 1);
 
-  var where = { boardId: parseInt(boardId) };
+  var where = { BoardId: parseInt(boardId) };
 
   const posts = await models.Post.findAll({
     order: [["createdAt", "DESC"]],

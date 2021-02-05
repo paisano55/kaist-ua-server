@@ -1,27 +1,27 @@
 "use strict";
 module.exports = (sequelize, DataTypes) => {
-  const Payment = sequelize.define(
-    "Payment",
+  const PostTag = sequelize.define(
+    "PostTag",
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      studentNumber: DataTypes.STRING,
-      year: DataTypes.INTEGER,
-      semester: DataTypes.STRING,
+      korName: DataTypes.TEXT,
+      engName: DataTypes.TEXT,
     },
     {
       freezeTableName: true,
-      timestamps: false,
       charset: "utf8",
       collate: "utf8_general_ci",
+      timestamps: false,
     }
   );
-  Payment.associate = function (models) {
+  PostTag.associate = function (models) {
     // associations can be defined here
-    Payment.belongsTo(models.Student);
+    PostTag.belongsToMany(models.Post, { through: "Post_PostTag" });
+    PostTag.belongsTo(models.Board);
   };
-  return Payment;
+  return PostTag;
 };
