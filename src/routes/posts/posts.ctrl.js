@@ -365,13 +365,10 @@ exports.update = async (ctx) => {
     });
     ctx.assert(admin, 401);
     const { id } = ctx.params;
-    const { title, author, content, views } = ctx.request.body;
-    const post = {
-        title: title,
-        author: author,
-        content: content,
-        views: views,
-    };
+    const post = ctx.request.body;
+    console.log(post);
+
+
 
     await models.Post.update(post, {
         where: { id: id },
