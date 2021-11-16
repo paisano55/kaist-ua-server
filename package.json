@@ -20,7 +20,7 @@
   "homepage": "https://github.com/winningarc/kaist-ua-server#readme",
   "dependencies": {
     "@koa/cors": "^3.0.0",
-    "aws-sdk": "^2.766.0",
+    "aws-sdk": "^2.814.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
