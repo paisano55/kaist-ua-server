@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
             engTitle: DataTypes.STRING,
             korDescription: DataTypes.TEXT,
             engDescription: DataTypes.TEXT,
+            redirection: DataTypes.TEXT,
+            viewHome: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true
+            }
         },
         {
             freezeTableName: true,
