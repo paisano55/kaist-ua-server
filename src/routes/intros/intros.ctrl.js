@@ -3,14 +3,14 @@ const Op = require("sequelize").Op;
 
 /** @swagger
  *  /intros:
- *    post:
+ *    intro:
  *      summary: upload introductions
  *      tags: [Introuctions]
  *      produces:
  *        - application/json
  *      parameters:
  *        - in: body
- *          name: post
+ *          name: intro
  *          schema:
  *            type: object
  *            properties:
@@ -69,16 +69,16 @@ exports.write = async (ctx) => {
         where: { id },
     });
     ctx.assert(admin, 401);
-    const post = ctx.request.body;
-    console.log(post);
-    const res = await models.Intro.create(post);
+    const intro = ctx.request.body;
+    console.log(intro);
+    const res = await models.Intro.create(intro);
     ctx.assert(res, 400);
     ctx.status = 204;
 
 };
 
 /** @swagger
- *  /posts:
+ *  /intros:
  *    get:
  *      summary: obtain all intorduction headers
  *      description: gets title, etc
@@ -92,7 +92,7 @@ exports.write = async (ctx) => {
  *          schema:
  *            type: object
  *            properties:
- *              posts:
+ *              intros:
  *                type: array
  *                items:
  *                  type: object
@@ -123,10 +123,10 @@ exports.list = async (ctx) => {
 };
 
 /** @swagger
- *  /posts/{id}:
+ *  /intros/{id}:
  *    get:
- *      summary: obtain post by ID
- *      tags: [Posts]
+ *      summary: obtain intro by ID
+ *      tags: [intros]
  *      produces:
  *        - application/json
  *      parameters:
@@ -182,10 +182,10 @@ exports.read = async (ctx) => {
 };
 
 /** @swagger
- *  /posts/{id}:
+ *  /intros/{id}:
  *    delete:
- *      summary: delete post by ID
- *      tags: [Posts]
+ *      summary: delete intro by ID
+ *      tags: [intros]
  *      parameters:
  *        - in: path
  *          name: id
@@ -202,7 +202,7 @@ exports.read = async (ctx) => {
  *        401:
  *          description: Unauthorized
  *        404:
- *          description: Not Found (post doesn't exist)
+ *          description: Not Found (intro doesn't exist)
  *          schema:
  *            type: object
  *            properties:
@@ -241,10 +241,10 @@ exports.remove = async (ctx) => {
 };
 
 /** @swagger
- *  /posts/{id}:
+ *  /intros/{id}:
  *    patch:
- *      summary: update title or content of post
- *      tags: [Posts]
+ *      summary: update title or content of intro
+ *      tags: [intros]
  *      parameters:
  *        - in: path
  *          name: id
@@ -298,16 +298,14 @@ exports.update = async (ctx) => {
     });
     ctx.assert(admin, 401);
     const { id } = ctx.params;
-    const post = ctx.request.body;
-    console.log(post);
+    const intro = ctx.request.body;
+    console.log(intro);
 
-
-
-    await models.Intro.update(post, {
+    await models.Intro.update(intro, {
         where: { id: id },
     })
         .then((res) => {
-            ctx.body = post;
+            ctx.body = intro;
             console.log("소개글 업데이트 성공!");
         })
         .catch((err) => {

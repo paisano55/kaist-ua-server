@@ -1,6 +1,6 @@
 const models = require('../../database/models');
 
-exports.upload = async (ctx) => {
+exports.add = async (ctx) => {
   const { year, semester, due } = ctx.request.body;
   const res = await models.deadline.create({ year, semester, due });
   ctx.assert(res, 400);
