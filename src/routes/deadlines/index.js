@@ -4,5 +4,6 @@ const deadlinesCtrl = require('./deadlines.ctrl');
 
 deadlines.get('/', deadlinesCtrl.list);
 deadlines.post('/', deadlinesCtrl.add);
+deadlines.patch('/:id', deadlinesCtrl.update);
 
 module.exports = deadlines;
