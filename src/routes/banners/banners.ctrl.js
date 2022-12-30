@@ -97,7 +97,7 @@ exports.upload = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.list = async (ctx) => {
-  const banners = await models.Banner.findAll({ where: { isActive: true } });
+  const banners = await models.Banner.findAll();
   ctx.assert(banners, 404);
   ctx.body = banners;
 };
@@ -143,4 +143,68 @@ exports.remove = async (ctx) => {
   ctx.assert(banner, 404);
   banner.destroy();
   ctx.status = 204;
+};
+
+/** @swagger
+ *  /banners/{id}:
+ *    patch:
+ *      summary: update banner by ID
+ *      tags: [Banners]
+ *      parameters:
+ *        - $ref: "#/parameters/adminAuth@header"
+ *        - in: body
+ *          name: banner
+ *          schema:
+ *            type: object
+ *            properties:
+ *              url:
+ *                type: string
+ *              link:
+ *                type: string
+ *          required: true
+ *      responses:
+ *        200:
+ *          description: Success
+ *          schema:
+ *            type: object
+ *            properties:
+ *              id:
+ *                type: string
+ *                format: uuid
+ *              url:
+ *                type: string
+ *              link:
+ *                type: string
+ *              updated_at:
+ *                type: string
+ *                format: date-time
+ *              created_at:
+ *                type: string
+ *                format: date-time
+ *        204:
+ *          description: No Content
+ *        400:
+ *          description: Bad Request
+ *        401:
+ *          description: Unauthorized
+ *        404:
+ *          description: Not Found
+ *        500:
+ *          description: Internal Server Error
+ */
+exports.update = async (ctx) => {
+  const { id } = ctx.params;
+  const { image, link, isActive } = ctx.request.body;
+  const banner = {
+    image: image,
+    link: link,
+    isActive: isActive,
+  };
+
+  const res = await models.Banner.update(banner, {
+    where: { id: id },
+  });
+  ctx.assert(res, 404);
+  ctx.status = 200;
+  ctx.body = res;
 };
