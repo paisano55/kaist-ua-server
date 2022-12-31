@@ -50,3 +50,39 @@ exports.list = async (ctx) => {
   ctx.assert(student, 401);
   ctx.body = { payments: student.Payments };
 };
+
+/**
+ * POST /getAll
+ * { year, semester }
+ * or none for **EVERYTHING**
+ */
+exports.getAll = async (ctx) => {
+  ctx.assert(ctx.request.user, 401);
+  const { id } = ctx.request.user;
+  const admin = await models.Admin.findOne({
+    where: { id },
+  });
+  ctx.assert(admin, 401);
+  const getEverything = ctx.request.body.length > 5 ? false : true;
+
+  // TODO : log this PROPERLY
+  console.log(id, "at", "ACCESSED payment list", getEverything ? "OF ALL TIME" : null, "from", ctx.request.ip)
+
+  if (getEverything === false) {
+    const { year, semester } = ctx.request.body;
+    const res = await models.Payment.findAll({
+      where: {
+        year,
+        semester,
+      },
+      order: [['ku_std_no', 'ASC']],
+    });
+  } else {
+    const res = await models.Payment.findAll({
+      order: [['ku_std_no', 'ASC']],
+    });
+  }
+  ctx.assert(res, 404);
+  ctx.body = res;
+};
+
