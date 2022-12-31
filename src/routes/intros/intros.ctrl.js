@@ -119,7 +119,7 @@ exports.list = async (ctx) => {
         raw: false,
     });
 
-    ctx.body = { intros };
+    ctx.body = intros;
 };
 
 /** @swagger
