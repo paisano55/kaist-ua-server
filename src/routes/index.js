@@ -9,6 +9,7 @@ const auth = require('./auth');
 const payments = require('./payments');
 const cancelRequest = require('./cancelRequest');
 const intros = require('./intros');
+const rules = require('./rules');
 const deadlines = require('./deadlines');
 
 const router = new Router();
@@ -26,6 +27,7 @@ router.use('/petitions', petitions.routes());
 router.use('/payments', payments.routes());
 router.use('/cancelRequest', cancelRequest.routes());
 router.use('/intros', intros.routes());
+router.use('/rules', rules.routes());
 router.use('/deadlines', deadlines.routes());
 
 module.exports = router;

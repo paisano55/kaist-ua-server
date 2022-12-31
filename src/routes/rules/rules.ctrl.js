@@ -114,12 +114,8 @@ exports.write = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.list = async (ctx) => {
-
-    const rules = await models.Rule.findAll({
-        raw: false,
-    });
-
-    ctx.body = { rules: rules };
+    const rules = await models.Rule.findAll();
+    ctx.body = rules;
 };
 
 /** @swagger

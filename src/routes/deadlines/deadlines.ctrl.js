@@ -25,3 +25,14 @@ exports.update = async (ctx) => {
   ctx.status = 200;
   ctx.body = res;
 };
+
+exports.remove = async (ctx) => {
+  const { id } = ctx.params;
+
+  const deadline = await models.Deadline.findOne({
+    where: { id: id },
+  });
+  ctx.assert(deadline, 404);
+  deadline.destroy();
+  ctx.status = 204;
+};
