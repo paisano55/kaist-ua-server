@@ -1,3 +1,5 @@
+.DS_Store
+
 # pm2 ecosystem
 ecosystem.config.js
 
@@ -8,6 +10,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# Payment logs
+payment-log/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

@@ -57,6 +57,20 @@ exports.list = async (ctx) => {
  * or none for **EVERYTHING**
  */
 exports.getAll = async (ctx) => {
+  const fs = require('fs');
+  if (!fs.existsSync('./payment-log')) {
+    fs.mkdirSync('./payment-log');
+  }
+  utc = new Date();
+  console.log(`TRY TO ACCESS payment list from IP : ${ctx.request.ip} at ${utc}`)
+  fs.writeFile(`./payment-log/payment-access-try-${utc}.txt`,
+    `TRY TO ACCESS payment list from IP : ${ctx.request.ip} at ${utc}
+    Request Body : ${JSON.stringify(ctx.request.body)}
+    This log file is created before authentication.`,
+    (err) => {
+      if (err) console.log('Error during create log: ', err);
+      else console.log('Log created');
+    });
   ctx.assert(ctx.request.user, 401);
   const { id } = ctx.request.user;
   const admin = await models.Admin.findOne({
@@ -64,9 +78,6 @@ exports.getAll = async (ctx) => {
   });
   ctx.assert(admin, 401);
   const getEverything = ctx.request.body.length > 5 ? false : true;
-
-  // TODO : log this PROPERLY
-  console.log(id, "at", "ACCESSED payment list", getEverything ? "OF ALL TIME" : null, "from", ctx.request.ip)
 
   if (getEverything === false) {
     const { year, semester } = ctx.request.body;
@@ -82,6 +93,16 @@ exports.getAll = async (ctx) => {
       order: [['ku_std_no', 'ASC']],
     });
   }
+  console.log(`ID : ${id}, SUCCESSLY ACCESSED payment list ${getEverything ? "OF ALL TIME" : null} from IP : ${ctx.request.ip}. Detail Content is in log file.`);
+  fs.writeFile(`./payment-log/payment-access-success-${utc}.txt`,
+    `ID : ${id}, ACCESSED payment list ${getEverything ? "OF ALL TIME" : null} from IP : ${ctx.request.ip} at ${utc} 
+    Request Body : ${JSON.stringify(ctx.request.body)}
+    Response Body : ${JSON.stringify(res)}
+    This log file is created after authentication and successful response.`,
+    (err) => {
+      if (err) console.log('Error during create log: ', err);
+      else console.log('Log created');
+    });
   ctx.assert(res, 404);
   ctx.body = res;
 };
