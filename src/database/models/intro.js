@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             parentId: DataTypes.INTEGER,
             subId: DataTypes.INTEGER,
+            prevId: DataTypes.INTEGER,
             korTitle: DataTypes.TEXT,
             engTitle: DataTypes.TEXT,
             korContent: DataTypes.TEXT,

@@ -3,11 +3,8 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     return Promise.all([
-      queryInterface.addColumn('Intro', 'createdAt', {
-        type: Sequelize.DATE,
-      }),
-      queryInterface.addColumn('Intro', 'updatedAt', {
-        type: Sequelize.DATE,
+      queryInterface.addColumn('Rule', 'prevId', {
+        type: Sequelize.INTEGER,
       }),
     ]);
   },
@@ -20,8 +17,7 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
     return Promise.all([
-      queryInterface.removeColumn('Intro', 'createdAt'),
-      queryInterface.removeColumn('Intro', 'updatedAt')
+      queryInterface.removeColumn('Rule', 'prevId'),
     ]);
   }
 };

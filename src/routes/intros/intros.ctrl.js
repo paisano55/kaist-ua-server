@@ -33,22 +33,6 @@ const Op = require("sequelize").Op;
  *      responses:
  *        200:
  *          description: Success
- *          schema:
- *            type: object
- *            properties:
- *              id:
- *                type: string
- *                format: uuid
- *              views:
- *                type: integer
- *              title:
- *                type: string
- *              author:
- *                type: string
- *              content:
- *                type: string
- *              bulletin_id:
- *                type: integer
  *        204:
  *          description: No Content
  *        400:
@@ -73,8 +57,7 @@ exports.write = async (ctx) => {
     console.log(intro);
     const res = await models.Intro.create(intro);
     ctx.assert(res, 400);
-    ctx.status = 204;
-
+    ctx.status = 200;
 };
 
 /** @swagger
@@ -115,8 +98,59 @@ exports.write = async (ctx) => {
  */
 exports.list = async (ctx) => {
 
-    const intros = await models.Intro.findAll({
+    const introsRaw = await models.Intro.findAll({
         raw: false,
+    });
+
+    const nonSubIntros = introsRaw.filter((intro) => {
+        return intro.parentId === null;
+    });
+
+    const subIntros = introsRaw.filter((intro) => {
+        return intro.parentId !== null;
+    });
+
+    const head = nonSubIntros.findOne((intro) => {
+        // Filter out all sub-intros and return only the top-level intros
+        return intro.prevId === null;
+    });
+    head.subIntros = [];
+
+    let intros = [];
+    intros.push(head);
+
+    let currentId = head.id;
+    while (true) {
+        let next = nonSubIntros.find((intro) => {
+            return intro.prevId === currentId;
+        });
+        if (next) {
+            next.subIntros = [];
+            intros.push(next);
+            currentId = next.id;
+        } else {
+            break;
+        }
+    }
+
+    intros.forEach((intro) => {
+        const sub = subIntros.filter((subIntro) => {
+            return subIntro.parentId === intro.id;
+        });
+        intro.subIntros.push(sub.findOne((subIntro) => { subIntro.prevId === null; }));
+
+        let currentId = intro.subIntros[0].id;
+        while (true) {
+            let next = sub.find((subIntro) => {
+                return subIntro.prevId === currentId;
+            });
+            if (next) {
+                intro.subIntros.push(next);
+                currentId = next.id;
+            } else {
+                break;
+            }
+        }
     });
 
     ctx.body = intros;
@@ -219,25 +253,51 @@ exports.remove = async (ctx) => {
         where: { id: adminId },
     });
     ctx.assert(admin, 401);
-    const { id } = ctx.params;
 
-    await models.Intro.destroy({
-        where: { id: id },
-    })
-        .then((res) => {
-            if (!res) {
-                ctx.status = 404;
-                ctx.body = {
-                    message: "소개글이 존재하지 않습니다.",
-                };
-            } else {
-                console.log("소개글 삭제 성공!");
-                ctx.status = 204;
-            }
+    const id = ctx.params;
+    // Delete and update should be done in a transaction (Because of prevId)
+    const transaction = await sequelize.transaction();
+    try {
+        let prevId;
+        await models.Intro.findOne({
+            where: { id: id },
         })
-        .catch((err) => {
-            console.log(err);
-        });
+            .then((res) => {
+                prevId = res.prevId;
+            });
+
+        await models.Intro.update({ prevId: prevId }, {
+            where: {
+                prevId: id,
+            },
+        }, { transaction: transaction }); // Update prevId of next intro
+
+        await models.Intro.destroy({
+            where: {
+                // Delete all intros with id or parentId of id (same as foreigen key cascading)
+                [Op.or]: {
+                    id: id,
+                    parentId: id,
+                }
+            },
+        }, { transaction: transaction })
+            .then((res) => {
+                if (!res) {
+                    ctx.status = 404;
+                    ctx.body = {
+                        message: "소개글이 존재하지 않습니다.",
+                    };
+                } else {
+                    console.log("소개글 삭제 성공!");
+                    ctx.status = 204;
+                }
+            });
+
+        await transaction.commit();
+    } catch (err) {
+        await transaction.rollback();
+        console.log(err);
+    }
 };
 
 /** @swagger
@@ -297,11 +357,17 @@ exports.update = async (ctx) => {
         where: { id: adminId },
     });
     ctx.assert(admin, 401);
+
+
     const { id } = ctx.params;
     const intro = ctx.request.body;
-    console.log(intro);
-
-    await models.Intro.update(intro, {
+    await models.Intro.update({
+        // Change subId or prevId is not allowed
+        korTitle: intro.korTitle,
+        engTitle: intro.engTitle,
+        korContent: intro.korContent,
+        engContent: intro.engContent
+    }, {
         where: { id: id },
     })
         .then((res) => {
