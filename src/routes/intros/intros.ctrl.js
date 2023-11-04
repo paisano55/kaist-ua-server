@@ -99,8 +99,13 @@ exports.write = async (ctx) => {
 exports.list = async (ctx) => {
 
     const introsRaw = await models.Intro.findAll({
-        raw: false,
+        raw: true,
     });
+
+    if (introsRaw.length === 0) {
+        ctx.status = 204;
+        return;
+    }
 
     const nonSubIntros = introsRaw.filter((intro) => {
         return intro.parentId === null;
@@ -110,13 +115,13 @@ exports.list = async (ctx) => {
         return intro.parentId !== null;
     });
 
-    const head = nonSubIntros.findOne((intro) => {
+    const head = nonSubIntros.find((intro) => {
         // Filter out all sub-intros and return only the top-level intros
         return intro.prevId === null;
     });
-    head.subIntros = [];
-
+    
     let intros = [];
+    head.subIntros = [];
     intros.push(head);
 
     let currentId = head.id;
@@ -137,7 +142,10 @@ exports.list = async (ctx) => {
         const sub = subIntros.filter((subIntro) => {
             return subIntro.parentId === intro.id;
         });
-        intro.subIntros.push(sub.findOne((subIntro) => { subIntro.prevId === null; }));
+
+        if(sub.length === 0) return;
+
+        intro.subIntros.push(sub.find((subIntro) => subIntro.prevId === null));
 
         let currentId = intro.subIntros[0].id;
         while (true) {
