@@ -2,10 +2,25 @@ const models = require('../../database/models');
 
 exports.add = async (ctx) => {
   const { year, semester, due } = ctx.request.body;
-  const res = await models.Deadline.create({ year, semester, due });
-  ctx.assert(res, 400);
-  ctx.status = 200;
-  ctx.body = res;
+
+  const deadline = await models.Deadline.findOne({
+    where: { year: year, semester: semester },
+  });
+
+  if (deadline) {
+    const res = await models.Deadline.update({ due: due }, {
+      where: { year: year, semester: semester },
+    });
+
+    ctx.assert(res, 404);
+    ctx.status = 200;
+    ctx.body = res;
+  } else {
+    const res = await models.Deadline.create({ year, semester, due });
+    ctx.assert(res, 400);
+    ctx.status = 200;
+    ctx.body = res;
+  }
 };
 
 exports.list = async (ctx) => {
