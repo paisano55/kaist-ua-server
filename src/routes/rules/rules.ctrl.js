@@ -62,19 +62,65 @@ const Op = require("sequelize").Op;
  */
 exports.write = async (ctx) => {
 
-    console.log(ctx.request);
     ctx.assert(ctx.request.user, 401);
     const { id } = ctx.request.user;
     const admin = await models.Admin.findOne({
         where: { id },
     });
     ctx.assert(admin, 401);
-    const rule = ctx.request.body;
-    console.log(rule);
-    const res = await models.Rule.create(rule);
-    ctx.assert(res, 400);
-    ctx.status = 204;
 
+    const rule = ctx.request.body;
+
+    const transaction = await models.sequelize.transaction();
+    try {
+        // If prevId is null, then it is the first rule
+        if (!rule.prevId) {
+            const originFirst = await models.Rule.findOne({
+                where: {
+                    parentId: !rule.parentId ? null : rule.parentId,
+                    prevId: null,
+                }
+            });
+
+            // Create new first rule
+            const res = await models.Rule.create(rule, { transaction: transaction });
+
+            // Update prevId of origin first rule to new first rule's id
+            if (originFirst) {
+                await models.Rule.update({ prevId: res.id }, {
+                    where: {
+                        id: originFirst.id,
+                    },
+                }, { transaction: transaction });
+            }
+        } else {
+            // If prevId is not null, then it is not the first rule
+            const originNext = await models.Rule.findOne({
+                where: {
+                    parentId: !rule.parentId ? null : rule.parentId,
+                    prevId: rule.prevId,
+                }
+            });
+
+            const res = await models.Rule.create(rule, { transaction: transaction });
+
+            if (!!originNext) {
+                await models.Rule.update({ prevId: res.id }, {
+                    where: {
+                        parentId: !rule.parentId ? null : rule.parentId,
+                        id: originNext.id,
+                    },
+                }, { transaction: transaction });
+            }
+        }
+
+        await transaction.commit();
+        ctx.status = 200;
+    } catch (err) {
+        await transaction.rollback();
+        ctx.status = 500;
+        console.log(err);
+    }
 };
 
 /** @swagger
@@ -114,7 +160,70 @@ exports.write = async (ctx) => {
  *          description: Internal Server Error
  */
 exports.list = async (ctx) => {
-    const rules = await models.Rule.findAll();
+
+    const rulesRaw = await models.Rule.findAll({
+        raw: true,
+    });
+
+    if (rulesRaw.length === 0) {
+        ctx.status = 204;
+        return;
+    }
+
+    const nonSubRules = rulesRaw.filter((rule) => {
+        return rule.parentId === null;
+    });
+
+    const subIntros = rulesRaw.filter((rule) => {
+        return rule.parentId !== null;
+    });
+
+    const head = nonSubRules.find((rule) => {
+        // Filter out all sub-rules and return only the top-level rules
+        return rule.prevId === null;
+    });
+
+    let rules = [];
+    head.subIntros = [];
+    rules.push(head);
+
+    let currentId = head.id;
+    while (true) {
+        let next = nonSubRules.find((rule) => {
+            return rule.prevId === currentId;
+        });
+        if (next) {
+            next.subIntros = [];
+            rules.push(next);
+            currentId = next.id;
+        } else {
+            break;
+        }
+    }
+
+    rules.forEach((rule) => {
+        const sub = subIntros.filter((subRule) => {
+            return subRule.parentId === rule.id;
+        });
+
+        if (sub.length === 0) return;
+
+        rule.subIntros.push(sub.find((subRule) => subRule.prevId === null));
+
+        let currentId = rule.subIntros[0].id;
+        while (true) {
+            let next = sub.find((subRule) => {
+                return subRule.prevId === currentId;
+            });
+            if (next) {
+                rule.subIntros.push(next);
+                currentId = next.id;
+            } else {
+                break;
+            }
+        }
+    });
+
     ctx.body = rules;
 };
 
@@ -215,25 +324,49 @@ exports.remove = async (ctx) => {
         where: { id: adminId },
     });
     ctx.assert(admin, 401);
-    const { id } = ctx.params;
 
-    await models.Rule.destroy({
-        where: { id: id },
-    })
-        .then((res) => {
-            if (!res) {
-                ctx.status = 404;
-                ctx.body = {
-                    message: "회칙 항목이 존재하지 않습니다.",
-                };
-            } else {
-                console.log("회칙 삭제 성공!");
-                ctx.status = 204;
-            }
+    const id = ctx.params.id;
+    // Delete and update should be done in a transaction (Because of prevId)
+    const transaction = await models.sequelize.transaction();
+    try {
+        console.log(id);
+        const res = await models.Rule.findOne({
+            where: { id: id },
         })
-        .catch((err) => {
-            console.log(err);
-        });
+
+        console.log(res);
+        await models.Rule.update({ prevId: res.prevId }, {
+            where: {
+                prevId: id,
+            },
+        }, { transaction: transaction }); // Update prevId of next rule
+
+        await models.Rule.destroy({
+            where: {
+                // Delete all rules with id or parentId of id (same as foreigen key cascading)
+                [Op.or]: {
+                    id: id,
+                    parentId: id,
+                }
+            },
+        }, { transaction: transaction })
+            .then((res) => {
+                if (!res) {
+                    ctx.status = 404;
+                    ctx.body = {
+                        message: "소개글이 존재하지 않습니다.",
+                    };
+                } else {
+                    ctx.status = 204;
+                }
+            });
+
+        await transaction.commit();
+    } catch (err) {
+        await transaction.rollback();
+        ctx.status = 500;
+        console.error(err);
+    }
 };
 
 /** @swagger
@@ -293,18 +426,24 @@ exports.update = async (ctx) => {
         where: { id: adminId },
     });
     ctx.assert(admin, 401);
+
+
     const { id } = ctx.params;
     const rule = ctx.request.body;
-    console.log(rule);
-
-    await models.Rule.update(rule, {
+    await models.Rule.update({
+        // Change subId or prevId is not allowed
+        korTitle: rule.korTitle,
+        engTitle: rule.engTitle,
+        korContent: rule.korContent,
+        engContent: rule.engContent
+    }, {
         where: { id: id },
     })
         .then((res) => {
             ctx.body = rule;
-            console.log("회칙 업데이트 성공!");
+            console.log("소개글 업데이트 성공!");
         })
         .catch((err) => {
-            console.log(err);
+            console.error(err);
         });
 };

@@ -19,7 +19,7 @@ const run = async () => {
         console.error("Unable to connect to the database:", error);
     }
 
-    app.use(cors({ credentials: true, origin: "http://channeltalk.sparcs.org:3001" }));
+    app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
     app.use(helmet());
     app.use(logger());
     app.use(bodyParser());

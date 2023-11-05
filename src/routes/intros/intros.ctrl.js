@@ -22,13 +22,9 @@ const Op = require("sequelize").Op;
  *                type: string
  *              engContent:
  *                type: string
- *          required: true
- *        - in: query
- *          name: parents
- *          schema:
  *              parentId:
  *                type: integer
- *              childId:
+ *              prevId:
  *                type: integer
  *      responses:
  *        200:
@@ -46,18 +42,66 @@ const Op = require("sequelize").Op;
  */
 exports.write = async (ctx) => {
 
-    console.log(ctx.request);
     ctx.assert(ctx.request.user, 401);
     const { id } = ctx.request.user;
     const admin = await models.Admin.findOne({
         where: { id },
     });
     ctx.assert(admin, 401);
+
     const intro = ctx.request.body;
     console.log(intro);
-    const res = await models.Intro.create(intro);
-    ctx.assert(res, 400);
-    ctx.status = 200;
+
+    const transaction = await models.sequelize.transaction();
+    try {
+        // If prevId is null, then it is the first intro
+        if (!intro.prevId) {
+            const originFirst = await models.Intro.findOne({
+                where: {
+                    parentId: !intro.parentId ? null : intro.parentId,
+                    prevId: null,
+                }
+            });
+
+            // Create new first intro
+            const res = await models.Intro.create(intro, { transaction: transaction });
+
+            // Update prevId of origin first intro to new first intro's id
+            if (originFirst) {
+                await models.Intro.update({ prevId: res.id }, {
+                    where: {
+                        id: originFirst.id,
+                    },
+                }, { transaction: transaction });
+            }
+        } else {
+            // If prevId is not null, then it is not the first intro
+            const originNext = await models.Intro.findOne({
+                where: {
+                    parentId: !intro.parentId ? null : intro.parentId,
+                    prevId: intro.prevId,
+                }
+            });
+
+            const res = await models.Intro.create(intro, { transaction: transaction });
+
+            if (!!originNext) {
+                await models.Intro.update({ prevId: res.id }, {
+                    where: {
+                        parentId: !intro.parentId ? null : intro.parentId,
+                        id: originNext.id,
+                    },
+                }, { transaction: transaction });
+            }
+        }
+
+        await transaction.commit();
+        ctx.status = 200;
+    } catch (err) {
+        await transaction.rollback();
+        ctx.status = 500;
+        console.log(err);
+    }
 };
 
 /** @swagger
@@ -119,7 +163,7 @@ exports.list = async (ctx) => {
         // Filter out all sub-intros and return only the top-level intros
         return intro.prevId === null;
     });
-    
+
     let intros = [];
     head.subIntros = [];
     intros.push(head);
@@ -143,10 +187,11 @@ exports.list = async (ctx) => {
             return subIntro.parentId === intro.id;
         });
 
-        if(sub.length === 0) return;
+        if (sub.length === 0) return;
 
         intro.subIntros.push(sub.find((subIntro) => subIntro.prevId === null));
 
+        console.log(sub, intro.subIntros);
         let currentId = intro.subIntros[0].id;
         while (true) {
             let next = sub.find((subIntro) => {
@@ -219,7 +264,7 @@ exports.read = async (ctx) => {
             console.log(res);
         })
         .catch((err) => {
-            console.log(err);
+            console.error(err);
         });
 };
 
@@ -262,19 +307,17 @@ exports.remove = async (ctx) => {
     });
     ctx.assert(admin, 401);
 
-    const id = ctx.params;
+    const id = ctx.params.id;
     // Delete and update should be done in a transaction (Because of prevId)
-    const transaction = await sequelize.transaction();
+    const transaction = await models.sequelize.transaction();
     try {
-        let prevId;
-        await models.Intro.findOne({
+        console.log(id);
+        const res = await models.Intro.findOne({
             where: { id: id },
         })
-            .then((res) => {
-                prevId = res.prevId;
-            });
 
-        await models.Intro.update({ prevId: prevId }, {
+        console.log(res);
+        await models.Intro.update({ prevId: res.prevId }, {
             where: {
                 prevId: id,
             },
@@ -296,7 +339,6 @@ exports.remove = async (ctx) => {
                         message: "소개글이 존재하지 않습니다.",
                     };
                 } else {
-                    console.log("소개글 삭제 성공!");
                     ctx.status = 204;
                 }
             });
@@ -304,7 +346,8 @@ exports.remove = async (ctx) => {
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
-        console.log(err);
+        ctx.status = 500;
+        console.error(err);
     }
 };
 
@@ -383,6 +426,6 @@ exports.update = async (ctx) => {
             console.log("소개글 업데이트 성공!");
         })
         .catch((err) => {
-            console.log(err);
+            console.error(err);
         });
 };
